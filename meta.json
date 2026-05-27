@@ -1,1 +1,18 @@
-{"name": "Background highlight in Editor Cor de fundo", "mod": 1779281732, "min_point_version": 1, "max_point_version": 250705, "branch_index": 0, "disabled": false, "config": {"colors": [{"color": "#FFFF00", "shortcut": "Ctrl+Shift+Y"}, {"color": "#0000FF", "shortcut": "Ctrl+Shift+B"}, {"color": "#FF0000", "shortcut": "Ctrl+Shift+R"}, {"color": "#00AA00", "shortcut": "Ctrl+Shift+T"}, {"color": "#86efac", "shortcut": ""}]}}
+{
+  "name": "Background highlight in Editor Cor de fundo",
+  "mod": 1779281732,
+  "min_point_version": 1,
+  "max_point_version": 250705,
+  "branch_index": 0,
+  "disabled": false,
+  "config": {
+    "colors": [
+      { "color": "#fef08a", "shortcut": "Alt+Y" },
+      { "color": "#7dd3fc", "shortcut": "Alt+B" },
+      { "color": "#6ee7b7", "shortcut": "Alt+G" },
+      { "color": "#ccfbf1", "shortcut": "Alt+T" },
+      { "color": "#fda4af", "shortcut": "Alt+R" },
+      { "color": "#d9f99d", "shortcut": "Alt+L" }
+    ]
+  }
+}

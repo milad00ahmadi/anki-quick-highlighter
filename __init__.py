@@ -2,9 +2,17 @@ import functools
 from typing import List, Dict, Any
 
 from aqt.qt import (
-    QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
-    QListWidget, QListWidgetItem, QColorDialog,
-    QColor, QIcon, QPixmap, Qt
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QListWidget,
+    QListWidgetItem,
+    QColorDialog,
+    QColor,
+    QIcon,
+    QPixmap,
+    Qt,
 )
 
 from aqt import gui_hooks, mw
@@ -16,12 +24,13 @@ from aqt.utils import showInfo, tooltip
 CONFIG_KEY = "highlight_colors_addon_config_v2"
 
 DEFAULT_COLORS = [
-    {"color": "#fef08a", "shortcut": "Ctrl+Shift+Y"},
-    {"color": "#7dd3fc", "shortcut": "Ctrl+Shift+B"},
-    {"color": "F#f5d0feF0000", "shortcut": "Ctrl+Shift+F"},
-    {"color": "#fda4af", "shortcut": "Ctrl+Shift+R"},
-    {"color": "#d9f99d", "shortcut": "Ctrl+Shift+L"},
+    {"color": "#fef08a", "shortcut": "Alt+Y"},
+    {"color": "#7dd3fc", "shortcut": "Alt+B"},
+    {"color": "#6ee7b7", "shortcut": "Alt+G"},
+    {"color": "#fda4af", "shortcut": "Alt+R"},
+    {"color": "#d9f99d", "shortcut": "Alt+L"},
 ]
+
 
 def load_colors() -> List[Dict[str, Any]]:
     try:
@@ -36,6 +45,7 @@ def load_colors() -> List[Dict[str, Any]]:
             return saved
     return DEFAULT_COLORS
 
+
 def save_colors(colors: List[Dict[str, Any]]) -> None:
     try:
         current = mw.addonManager.getConfig(__name__) or {}
@@ -46,25 +56,28 @@ def save_colors(colors: List[Dict[str, Any]]) -> None:
     if mw.col:
         mw.col.conf.set(CONFIG_KEY, colors)
 
-# --- Lógica de Cor da Letra ---
+
+# --- Text Color Logic ---
+
 
 def get_text_color(hex_color: str) -> str:
-    """Calcula a luminosidade da cor para decidir se a letra deve ser branca ou preta."""
-    hex_color = hex_color.lstrip('#')
+    """Calculates color luminosity to decide if the text should be white or black."""
+    hex_color = hex_color.lstrip("#")
     if len(hex_color) == 6:
         try:
             r = int(hex_color[0:2], 16)
             g = int(hex_color[2:4], 16)
             b = int(hex_color[4:6], 16)
-            # Fórmula padrão de luminância
-            luminance = (0.299 * r + 0.587 * g + 0.114 * b)
+            # Standard luminance formula
+            luminance = 0.299 * r + 0.587 * g + 0.114 * b
             if luminance < 128:
                 return "white"
         except ValueError:
             pass
     return "black"
 
-# --- Aplicar / Remover destaque ---
+
+# --- Apply / Remove Highlight ---
 
 TOGGLE_HIGHLIGHT_JS = r"""
 (function() {
@@ -106,7 +119,7 @@ TOGGLE_HIGHLIGHT_JS = r"""
         parent.removeChild(el);
     }
 
-    // Tenta obter seleção do documento principal E de dentro de shadow roots
+    // Attempt to get selection from main document AND shadow roots
     var sel = null;
     var active = document.activeElement;
     var root = document;
@@ -127,7 +140,7 @@ TOGGLE_HIGHLIGHT_JS = r"""
     document.execCommand('styleWithCSS', false, true);
 
     if (existing) {
-        // REMOVER
+        // REMOVE
         if (range.collapsed) {
             unwrap(existing);
             sel.removeAllRanges();
@@ -159,11 +172,11 @@ TOGGLE_HIGHLIGHT_JS = r"""
             }
         }
     } else {
-        // APLICAR via execCommand
+        // APPLY via execCommand
         if (range.collapsed) return;
         document.execCommand('hiliteColor', false, color);
 
-        // CORREÇÃO PARA O MODO NOTURNO E CORES ESCURAS:
+        // FIX FOR NIGHT MODE AND DARK COLORS:
         if (sel.rangeCount > 0) {
             var newRange = sel.getRangeAt(0);
             var container = newRange.commonAncestorContainer;
@@ -175,7 +188,7 @@ TOGGLE_HIGHLIGHT_JS = r"""
                 
                 for (var i = 0; i < spans.length; i++) {
                     if (spans[i].style && spans[i].style.backgroundColor && colorsMatch(spans[i].style.backgroundColor, color)) {
-                        spans[i].style.color = textColor; // Aplica branca ou preta dependendo da cor de fundo
+                        spans[i].style.color = textColor; // Apply white or black depending on bg color
                     }
                 }
             }
@@ -186,19 +199,50 @@ TOGGLE_HIGHLIGHT_JS = r"""
 })();
 """
 
-def set_highlight(editor: Editor, color: str, text_color: str) -> None:
-    js = TOGGLE_HIGHLIGHT_JS.replace('__COLOR__', color).replace('__TEXT_COLOR__', text_color)
+
+def inject_relative_style_to_buttons(editor: Editor, length):
+    selectors = ", ".join([f"#text_highlight_{i}" for i in range(length)])
+
+    custom_css = f"""
+    #text_highlight_0 {{
+        margin-left: 4px;
+    }}
+    {selectors} {{
+        position: relative;
+        overflow: hidden;
+    }}
+
+    """
+    js = f"""
+    (function() {{
+        var style = document.createElement('style');
+        style.innerHTML = `{custom_css}`;
+        document.head.appendChild(style);
+    }})();
+    """
     editor.web.eval(js)
 
-def create_button_label(text: str, bg: str, text_color: str, weight: str) -> str:
-    return "<span style='background-color:{};color:{};font-weight:{};'>{}</span>".format(bg, text_color, weight, text)
 
-# --- Diálogo de configuração ---
+def set_highlight(editor: Editor, color: str, text_color: str) -> None:
+    js = TOGGLE_HIGHLIGHT_JS.replace("__COLOR__", color).replace(
+        "__TEXT_COLOR__", text_color
+    )
+    editor.web.eval(js)
+
+
+def create_button_label(text: str, bg: str, text_color: str, weight: str) -> str:
+    return "<span style='background-color:{};color:{};font-weight:{};display:flex;justify-content:center;align-items:center;position: absolute;inset:0;'>{}</span>".format(
+        bg, text_color, weight, text
+    )
+
+
+# --- Config Dialog ---
+
 
 class ConfigDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Gerenciar Cores de Destaque")
+        self.setWindowTitle("Manage Highlight Colors")
         self.setModal(True)
         self.colors = load_colors()
 
@@ -208,18 +252,18 @@ class ConfigDialog(QDialog):
         layout.addWidget(self.list_widget)
 
         btn_row = QHBoxLayout()
-        add_btn = QPushButton("Adicionar Cor")
+        add_btn = QPushButton("Add Color")
         add_btn.clicked.connect(self.add_color)
         btn_row.addWidget(add_btn)
-        rem_btn = QPushButton("Remover Selecionada")
+        rem_btn = QPushButton("Remove Selected")
         rem_btn.clicked.connect(self.remove_color)
         btn_row.addWidget(rem_btn)
         layout.addLayout(btn_row)
 
         ok_row = QHBoxLayout()
-        ok_btn = QPushButton("Salvar")
+        ok_btn = QPushButton("Save")
         ok_btn.clicked.connect(self.accept)
-        cancel_btn = QPushButton("Cancelar")
+        cancel_btn = QPushButton("Cancel")
         cancel_btn.clicked.connect(self.reject)
         ok_row.addStretch()
         ok_row.addWidget(ok_btn)
@@ -250,12 +294,13 @@ class ConfigDialog(QDialog):
             self.colors.pop(row)
             self.populate_list()
         else:
-            tooltip("Selecione uma cor para remover.", parent=self)
+            tooltip("Select a color to remove.", parent=self)
 
     def accept(self):
         save_colors(self.colors)
-        tooltip("Cores salvas!", parent=self)
+        tooltip("Colors saved!", parent=self)
         super().accept()
+
 
 def open_config_dialog(editor: Editor):
     dialog = ConfigDialog(editor.parentWindow)
@@ -263,46 +308,57 @@ def open_config_dialog(editor: Editor):
         if hasattr(editor, "load_buttons"):
             editor.load_buttons()
         else:
-            showInfo("Cores salvas. Feche e reabra o editor para ver as alterações.")
+            showInfo("Colors saved. Close and reopen the editor to see changes.")
 
-# --- Botões no editor ---
+
+# --- Editor Buttons ---
+
 
 def add_buttons(buttons: List[str], editor: Editor) -> List[str]:
+    total_colors = 0
     for i, data in enumerate(load_colors()):
+        total_colors = total_colors + 1
         color = data["color"]
         shortcut = data.get("shortcut", "")
         text_color = get_text_color(color)
-        
-        tip = "Destacar/Remover destaque com {}".format(color)
+
+        tip = "Highlight/Remove highlight with {}".format(color)
         if shortcut:
             tip += " ({})".format(shortcut)
-            
-        label = create_button_label("H", color, text_color, "bold")
+
+        label = create_button_label("A", color, text_color, "normal")
 
         buttons.append(
             editor.addButton(
                 icon=None,
                 cmd="text_highlight_{}".format(i),
-                func=functools.partial(set_highlight, color=color, text_color=text_color),
+                id="text_highlight_{}".format(i),
+                func=functools.partial(
+                    set_highlight, color=color, text_color=text_color
+                ),
                 tip=tip,
                 label=label,
                 keys=shortcut,
             )
         )
 
+    inject_relative_style_to_buttons(editor, total_colors)
+
     buttons.append(
         editor.addButton(
             icon=None,
             cmd="highlight_config",
             func=open_config_dialog,
-            tip="Gerenciar cores de destaque (Ctrl+Shift+H)",
+            tip="Manage highlight colors (Ctrl+Shift+H)",
             label="⚙️",
             keys="Ctrl+Shift+H",
         )
     )
     return buttons
 
+
 # --- Hooks ---
+
 
 def on_config_saved(new_config: dict, addon: str) -> None:
     if addon != __name__:
@@ -311,13 +367,17 @@ def on_config_saved(new_config: dict, addon: str) -> None:
     fixed = []
     for entry in colors:
         if isinstance(entry, dict) and "color" in entry:
-            fixed.append({
-                "color": entry["color"],
-                "shortcut": entry.get("shortcut", ""),
-            })
+            fixed.append(
+                {
+                    "color": entry["color"],
+                    "shortcut": entry.get("shortcut", ""),
+                }
+            )
     new_config["colors"] = fixed
 
+
 gui_hooks.editor_did_init_buttons.append(add_buttons)
+
 
 try:
     gui_hooks.addon_config_editor_will_save_json.append(on_config_saved)
