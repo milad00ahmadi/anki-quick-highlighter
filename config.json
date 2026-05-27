@@ -1,0 +1,8 @@
+{
+  "colors": [
+    {"color": "#FFFF00", "shortcut": "Ctrl+Shift+Y"},
+    {"color": "#0000FF", "shortcut": "Ctrl+Shift+B"},
+    {"color": "#FF0000", "shortcut": "Ctrl+Shift+R"},
+    {"color": "#00AA00", "shortcut": "Ctrl+Shift+T"}
+  ]
+}
