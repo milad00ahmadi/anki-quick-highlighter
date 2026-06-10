@@ -10,9 +10,29 @@
       { "color": "#fef08a", "shortcut": "Alt+Y" },
       { "color": "#7dd3fc", "shortcut": "Alt+B" },
       { "color": "#6ee7b7", "shortcut": "Alt+G" },
-      { "color": "#ccfbf1", "shortcut": "Alt+T" },
+      { "color": "#ccfbf1", "shortcut": "Control+Shift+T" },
       { "color": "#fda4af", "shortcut": "Alt+R" },
-      { "color": "#d9f99d", "shortcut": "Alt+L" }
+      { "color": "#d9f99d", "shortcut": "Alt+L" },
+      { "color": "#d8b4fe", "shortcut": "Alt+P" },
+      { "color": "#fda4af", "foreground": true }
+    ],
+    "foregroundColors": [
+      { "color": "#fef08a" },
+      { "color": "#7dd3fc" },
+      { "color": "#6ee7b7" },
+      { "color": "#ccfbf1" },
+      { "color": "#fda4af" },
+      { "color": "#d9f99d" },
+      { "color": "#d8b4fe" }
+    ],
+    "backgroundColors": [
+      { "color": "#fef08a", "shortcut": "Alt+Y" },
+      { "color": "#7dd3fc", "shortcut": "Alt+B" },
+      { "color": "#6ee7b7", "shortcut": "Alt+G" },
+      { "color": "#ccfbf1", "shortcut": "Control+Shift+T" },
+      { "color": "#fda4af", "shortcut": "Alt+R" },
+      { "color": "#d9f99d", "shortcut": "Alt+L" },
+      { "color": "#d8b4fe", "shortcut": "Alt+P" }
     ]
   }
 }
