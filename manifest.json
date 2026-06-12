@@ -1,8 +1,0 @@
-{
-    "name": "background highlight in editor",
-    "package": "anki_brasil.highlight",
-    "version": "2.0",
-    "description": "Place a letter H in the editor so that when you select the word, it is highlighted with a yellow background",
-    "author": "Eros Cardoso",
-    "ankiweb_id": 0 
-} 
